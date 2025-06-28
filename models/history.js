@@ -11,14 +11,17 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      History.belongsTo(models.Packet, {
+        foreignKey: 'id_packet',
+        as: 'packet',
+      });
     }
   }
   History.init({
     id_packet: DataTypes.INTEGER,
-    entry_date: DataTypes.DATE,
-    exit_date: DataTypes.DATE,
-    courier_photo: DataTypes.STRING,
-    user_photo: DataTypes.STRING
+    packet_name: DataTypes.STRING,
+    status: DataTypes.STRING,
+    createdAt: DataTypes.DATE,
   }, {
     sequelize,
     modelName: 'History',

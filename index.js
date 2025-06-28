@@ -4,14 +4,15 @@ const cors = require('cors');
 const routes = require('./routes');
 require('dotenv').config();
 
-app = express();
+const app = express();
 app.use(cors());
 app.use(express.json());
+
 app.use(routes);
 app.use('/uploads', express.static('uploads'));
 
 
 
 app.listen(port, () => {
-    console.log('System listening on port' `${port}`);
+    console.log(`Server listening on port ${port}`);
 });

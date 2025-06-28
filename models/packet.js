@@ -11,13 +11,19 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Packet.hasMany(models.History, {
+        foreignKey: 'id_packet',
+        as: 'histories',
+      });
     }
   }
   Packet.init({
     packet_name: DataTypes.STRING,
-    packet_key: DataTypes.STRING,
-    user_key: DataTypes.STRING,
-    status: DataTypes.STRING
+    receipt_number: DataTypes.STRING,
+    destination: DataTypes.STRING,
+    status: DataTypes.STRING,
+    createdAt: DataTypes.DATE,
+    updatedAt: DataTypes.DATE,
   }, {
     sequelize,
     modelName: 'Packet',
