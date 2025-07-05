@@ -27,7 +27,7 @@ const login = async (req, res) => {
                 full_name: user.full_name,
                 email: user.email,
                 },
-                '1h'
+                '7d', // Token expiration time
             );
         return res.status(200).json({ 
             message: 'Login successfully',
@@ -58,35 +58,43 @@ const forgotPassword = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Generate a random reset token (for example, using crypto)
         const resetToken = crypto.randomBytes(20).toString('hex');
-
-        // Set an expiration time for the token (e.g., 1 hour)
         const resetTokenExpiration = Date.now() + 3600000; // 1 hour
 
-        // Store the token and expiration in the user record (make sure the User model has these fields)
         user.resetPasswordToken = resetToken;
         user.resetPasswordExpires = resetTokenExpiration;
         await user.save();
 
-        // Create reset URL
-        const resetURL = `http://localhost:3000/reset-password/${resetToken}`;
+        const resetURL = `https://packet-sorting.vercel.app/reset-password?token=${resetToken}`;
 
-        // Set up nodemailer transporter
         const transporter = nodemailer.createTransport({
-            service: 'gmail', // You can change this to any service you're using
+            service: 'gmail',
             auth: {
-                user: process.env.EMAIL, // Replace with your email
-                pass: process.env.PASSWORD, // Replace with your email password
+                user: process.env.EMAIL,
+                pass: process.env.PASSWORD,
             },
         });
 
-        // Send the email with the reset link
         const mailOptions = {
-            from: process.env.EMAIL,
+            from: `"Packet Sorting Support" <${process.env.EMAIL}>`,
             to: user.email,
-            subject: 'Password Reset Request',
-            text: `You requested a password reset. Please click the link below to reset your password:\n\n${resetURL}\n\nIf you did not request this, please ignore this email.`
+            subject: '🔐 Reset Your Password',
+            text: `You requested a password reset. Please go to the following link to reset your password: ${resetURL}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee;">
+                    <h2 style="color: #0D47A1;">Packet Sorting - Password Reset</h2>
+                    <p>Hello <strong>${user.name || 'User'}</strong>,</p>
+                    <p>We received a request to reset your password. Click the button below to proceed:</p>
+                    <a href="${resetURL}" style="display: inline-block; background-color: #0D47A1; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                        Reset Password
+                    </a>
+                    <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
+                    <p style="word-break: break-all;">${resetURL}</p>
+                    <hr />
+                    <p style="font-size: 12px; color: #777;">If you didn’t request this, you can safely ignore this email.</p>
+                    <p style="font-size: 12px; color: #777;">This link will expire in 1 hour.</p>
+                </div>
+            `
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
@@ -94,7 +102,7 @@ const forgotPassword = async (req, res) => {
                 return res.status(500).json({ message: 'Error sending email', error });
             }
             return res.status(200).json({
-                message: 'Password reset link has been sent to your email address.'
+                message: 'Password reset email has been sent. Please check your inbox.'
             });
         });
     } catch (error) {
@@ -145,7 +153,7 @@ const authPacket = async (req, res) => {
             return res.status(404).json({ message: 'Packet not found' });
         }
 
-        res.status(200).json({ message: 'Packet authentication successfully', destination: packet.destination });
+        res.status(200).json({ message: 'Packet authentication successfully', id_packet: packet.id, destination: packet.destination });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error', error });

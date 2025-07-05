@@ -9,8 +9,8 @@ const { validateUser } = require('../middlewares/accessMiddleware');
 const { upload, compressImage } = require('../utils/multerConfig');
 
 router.get('/', validateUser, getAllHistories);
-router.post('/', upload.single('courier_photo'), compressImage, createHistory);
-router.put('/:id', upload.single('image'), compressImage, updateHistory);
+router.post('/', createHistory);
+router.put('/:id', updateHistory);
 router.delete('/:id', validateUser, deleteHistory);
 
 module.exports = router;

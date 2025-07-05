@@ -32,17 +32,15 @@ const getAllHistories = async (req, res) => {
 const createHistory = async (req, res) => {
     try {
         const { id_packet, status } = req.body;
-        const packet_name = await Packet.findOne({
-            where: {
-                receipt_number: id_packet
-            },
-            attributes: ['packet_name']
+        const packet_result = await Packet.findOne({
+            where: { id: id_packet }
         });
-        if (!packet_name) {
+
+        if (!packet_result) {
             return res.status(404).json({ message: 'Packet not found' });
         }
         const status_packet = status;
-        const newHistory = await History.create({ id_packet, packet_name,status });
+        const newHistory = await History.create({ id_packet, packet_name: packet_result.packet_name, status });
         const packet = await Packet.findByPk(id_packet);
         if (!packet) {
             return res.status(404).json({ message: 'Packet not found' });
